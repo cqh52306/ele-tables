@@ -3,12 +3,12 @@
  * @version:
  * @Author: caoqinghua
  * @Date: 2019-08-30 14:39:36
- * @LastEditors: caoqinghua
- * @LastEditTime: 2019-09-10 17:50:42
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2019-09-18 16:06:50
  -->
 <template>
   <div class="ele-table-box">
-    <el-table v-loading="loading" :row-class-name="rowClassFn" :data="tableData.list" element-loading-spinner="el-icon-loading" border style="width:100%" class="ele-table" @selection-change="handleSelectionChange" @sort-change="toSort">
+    <el-table v-loading="loading" :height="height" :row-class-name="rowClassFn" :data="tableData.list" element-loading-spinner="el-icon-loading" border style="width:100%" class="ele-table" @selection-change="handleSelectionChange" @sort-change="toSort">
       <el-table-column v-if="config.needSelection" type="selection" width="55" />
       <el-table-column v-for="(col,index) in config.tableRows" :fixed="col.fixed ? true : false" :prop="col.prop" :sortable="col.sortable ? col.sortable : false " :label="col.label" :width="col.width ? col.width : 'auto' " :key="index">
         <template slot-scope="scope">
@@ -108,7 +108,52 @@ export default {
       formatTime
     }
   },
-  props: ['config', 'tableData', 'routeChange', 'selectionFn', 'pagination', 'loading'],   // eslint-disable-line
+  props: {
+    height: {
+      type: Number,
+      default: 300
+    },
+    loading: {
+      type: Boolean,
+      default: false
+    },
+    pagination: {
+      type: Object,
+      default () {
+        return {
+          pageSize: 20, // 每页显示条目个数
+          pageSizes: [20, 50], // 每页显示个数选择器的选项设置
+          layout: "total, sizes, prev, pager, next" //, jumper组件布局，子组件名用逗号分隔
+        }
+      }
+    },
+    selectionFn: {
+      type: Array,
+      default () {
+        return [];
+      }
+    },
+    routeChange: {
+      type: Function,
+      default: function () { }
+    },
+    tableData: {
+      type: Object,
+      default () {
+        return {
+          list: []
+        }
+      }
+    },
+    config: {
+      type: Object,
+      default () {
+        return {
+          tableRows: []
+        }
+      }
+    }
+  },
   computed: {
     localPagination: function () {
       const { pageIndex, pageSize } = this.$route.query
@@ -126,10 +171,8 @@ export default {
     // 利用watch方法检测路由变化
     '$route': function (to, from) {
       if (to.path == from.path) {
-        console.log('路由查询参数变了--change', 1)
         this.handleRouteChange({ type: 'change' })
       } else {
-        console.log('路由发生跳转了--jump,清除列表数据', 2)
         this.tableData.list = []
         this.handleRouteChange({ type: 'jump' })
       }
